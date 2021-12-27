@@ -1,2 +1,4 @@
-# Big-Tech-Tweets-Sentiment-Analysis
-Time series sentiment analysis of tweets related to big-tech companies
+# Sentimental and Topical Trend Analysis of Big-Tech Tweets
+
+## Abstract
+In this paper we address questions related to sentimental and topical trends, as well as linguistic variations found within tweets. We examine Twitter data related to 5 Big-Tech companies, and later restrict our attention to tweets for Tesla and Microsoft, both of which reasonably represent two opposite ends of the sentimental polarity. Statistical methodologies such as topic modeling and factor analysis are utilized to address the research questions, and are accompanied by corpus linguistic techniques like part-of-speech tagging to prepare the data for analysis. We find that topical tendencies generally provide good context for understanding distinct sentimental trends in tweets. Positive and negative tweets also tend to have clear differences in linguistic characteristics, but the findings may need to be taken with a grain of salt. In the future, it would be worthwhile to put in more effort to filter out non-human generated noise as they tend to contaminate and skew the data.
