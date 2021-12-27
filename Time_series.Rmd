@@ -1,0 +1,326 @@
+---
+title: "CBE2"
+author: "Lee, Woo Chan"
+date: "10/31/2021"
+output: pdf_document
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r setup, message = FALSE, error=FALSE, warning=FALSE}
+library(quanteda)
+library(quanteda.textstats)
+library(tidyverse)
+library(cluster)
+library(factoextra)
+library(cmu.textstat)
+library(stringr)
+library(anytime)
+library(stringr)
+library(dendextend)
+library(ggdendro)
+library(janitor)
+library(data.table)
+```
+
+lab 11: vector embedding in plot (2014~2019 tsla comparison)
+
+```{r}
+# Read main and meta data
+twt <- read_csv("/Users/lee14257/Development/CMU/Text Analysis/Project/archive/Tweet.csv")
+#twt <- read_csv("/Users/lee14257/Development/CMU/Text Analysis/Project/archive/Tweet_sample.csv")
+twt_bytickers <- fread("/Users/lee14257/Development/CMU/Text Analysis/Project/CBE2/twt_bytickersymbol.csv")
+meta <- read_csv("/Users/lee14257/Development/CMU/Text Analysis/Project/archive/Company_Tweet.csv") 
+
+# Change "GOOGL" ticker to "GOOG" for consistency
+meta$ticker_symbol[meta$ticker_symbol == "GOOGL"] <- "GOOG"
+
+# Merge ticker_symbol meta data to twt
+twt <- merge(x = twt, y = meta, by = "tweet_id", all.x = TRUE)
+
+# Drop NA values
+twt <- twt[!is.na(twt$ticker_symbol), ] %>%
+  mutate(post_date = format(anytime(post_date), "%Y-%m"))
+head(twt)
+
+```
+\
+
+## Create twitter token table (company tickers)
+```{r}
+# This code was pre-run and stored into a CSV file so that we didn't have to 
+# run it again (took a long time to run)
+# twt_tkn <- twt %>%
+#   dplyr::select(ticker_symbol, body) %>%
+#   group_by(ticker_symbol) %>%
+#   summarise(text = paste(body, collapse=" ")) %>%
+#   mutate(
+#     doc_id = ticker_symbol,
+#     text = tolower(text)
+#     )
+names(twt_bytickers)[1] <- 'doc_id'
+names(twt_bytickers)[2] <- 'text'
+twt_bytickers$text <- tolower(twt_bytickers$text)
+
+```
+
+```{r}
+# Create token (by company tickers)
+twt_tkn <- twt_bytickers %>%
+  corpus() %>%
+  tokens(what="fastestword", remove_numbers=TRUE, remove_punct = TRUE, 
+         remove_symbols = TRUE, remove_url=TRUE) %>%
+  tokens_remove(c('\\$[a-z0-9]+', '\\#[a-z0-9]+', '[0-9]+\\%', '\\@[a-z0-9]+'), 
+                valuetype='regex') %>%
+  tokens_remove(c(stopwords("english"), "apple", "appl", "aapl", "apple's", 
+                  "amazon's", "amzn", "amazon", "google's", "google", "googl", 
+                  "goog", "microsoft", "microsoft's", "msft", "tsla", "tesla", 
+                  "tesla's"))
+
+```
+
+```{r}
+# Create docvar for the tokens
+doc_ticker <- names(twt_tkn) %>%
+  data.frame(ticker = .)
+
+docvars(twt_tkn) = doc_ticker
+
+```
+
+```{r}
+# Create dfm using tokens
+twt_dfm <- twt_tkn %>% dfm()
+
+```
+
+## Corpus Composition Table
+```{r}
+# Corpus composition table
+twt_comp <- ntoken(twt_dfm) %>%
+  data.frame(Tokens = .) %>%
+  rownames_to_column("Company Ticker") %>%
+  janitor::adorn_totals("row")
+
+```
+
+```{r}
+# Corpus composition table
+kableExtra::kbl(twt_comp, caption = "Composition of the twitter corpus", 
+                booktabs = T, linesep = "", format.args = list(big.mark = ",")) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::kable_classic() %>%
+  kableExtra::row_spec(5, hline_after = TRUE) %>%
+  kableExtra::row_spec(6, bold=T)
+
+```
+\
+
+## Keyness Tables
+```{r}
+# Create keyness tables for the 5 company tickers
+aapl_kw <- textstat_keyness(twt_dfm, docvars(twt_dfm, "ticker") == "AAPL", 
+                            measure = "lr") %>%
+  as_tibble() %>% dplyr::select(feature, G2) %>% rename(LL = G2, Token = feature)
+amzn_kw <- textstat_keyness(twt_dfm, docvars(twt_dfm, "ticker") == "AMZN", 
+                            measure = "lr") %>%
+  as_tibble() %>% dplyr::select(feature, G2) %>% rename(LL = G2, Token = feature) 
+goog_kw <- textstat_keyness(twt_dfm, docvars(twt_dfm, "ticker") == "GOOG", 
+                            measure = "lr") %>%
+  as_tibble() %>% dplyr::select(feature, G2) %>% rename(LL = G2, Token = feature)
+msft_kw <- textstat_keyness(twt_dfm, docvars(twt_dfm, "ticker") == "MSFT", 
+                            measure = "lr") %>%
+  as_tibble() %>% dplyr::select(feature, G2) %>% rename(LL = G2, Token = feature)
+tsla_kw <- textstat_keyness(twt_dfm, docvars(twt_dfm, "ticker") == "TSLA", 
+                            measure = "lr") %>%
+  as_tibble() %>% dplyr::select(feature, G2) %>% rename(LL = G2, Token = feature)
+
+```
+
+```{r echo=FALSE}
+# Keyness table for AAPL
+kableExtra::kbl(head(aapl_kw, 7), caption = "Tokens with the highest keyness 
+                values in the AAPL ticker compared to the rest", booktabs = T, 
+                linesep = "", digits = 2) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>% 
+  kableExtra::kable_classic()
+
+```
+\
+
+```{r echo=FALSE}
+# Keyness table for AMZN
+kableExtra::kbl(head(amzn_kw, 7), caption = "Tokens with the highest keyness 
+                values in the AMZN ticker compared to the rest", booktabs = T, 
+                linesep = "", digits = 2) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>% 
+  kableExtra::kable_classic()
+
+```
+\
+
+```{r echo=FALSE}
+# Keyness table for MSFT
+kableExtra::kbl(head(msft_kw, 7), caption = "Tokens with the highest keyness 
+                values in the MSFT ticker compared to the rest", booktabs = T, 
+                linesep = "", digits = 2) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>% 
+  kableExtra::kable_classic()
+
+```
+\
+
+```{r echo=FALSE}
+# Keyness table for GOOG
+kableExtra::kbl(head(goog_kw, 7), caption = "Tokens with the highest keyness 
+                values in the GOOG ticker compared to the rest", booktabs = T, 
+                linesep = "", digits = 2) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>% 
+  kableExtra::kable_classic()
+
+```
+\
+
+```{r echo=FALSE}
+# Keyness table for TSLA
+kableExtra::kbl(head(tsla_kw, 7), caption = "Tokens with the highest keyness 
+                values in the TSLA ticker compared to the rest", booktabs = T, 
+                linesep = "", digits = 2) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>% 
+  kableExtra::kable_classic()
+
+```
+\
+
+## Load Docuscope Dictionary
+```{r}
+# Add docuscope dictionary
+ds_dict <- dictionary(file = "/Users/lee14257/Development/CMU/Text Analysis/Project/ds_dict.yml")
+
+```
+
+## Create twitter token table (for time series)
+```{r}
+# Preprocessing twitter token table for time series analysis
+twt_time_tkn <- twt %>%
+  dplyr::select(ticker_symbol, post_date, body) %>%
+  group_by(ticker_symbol, post_date) %>%
+  summarise(text = paste(body, collapse=" ")) %>%
+  mutate(
+    doc_id = paste0(ticker_symbol, "_", post_date),
+    text = tolower(text)
+    ) %>%
+  corpus() %>%
+  tokens(what="fastestword", remove_numbers=TRUE, remove_punct = TRUE, 
+         remove_symbols = TRUE, remove_url=TRUE) %>%
+  tokens_remove(c(stopwords("english"), "apple", "appl", "aapl", "apple's", 
+                  "amazon's", "amzn", "amazon", "google's", "google", "googl", 
+                  "goog", "microsoft", "microsoft's", "msft", "tsla", "tesla", 
+                  "tesla's")) %>%
+  tokens_remove(c('\\$[a-z]+', '\\#[a-z]+', '[0-9]+\\%', '\\@[a-z0-9]+'), 
+                valuetype='regex')
+
+```
+\
+
+## Apply docuscope word tagging
+```{r}
+# Tag the tokens using docuscope
+ds_counts <- twt_time_tkn %>%
+  tokens_lookup(dictionary = ds_dict, levels = 1, valuetype = "fixed") %>%
+  dfm() %>%
+  convert(to = "data.frame") %>%
+  as_tibble() %>%
+  mutate(
+    # Add sentiment score
+    sentiment_score = positive - negative
+  )
+
+```
+
+```{r}
+# Normalize the counts
+tot_counts <- quanteda::ntoken(twt_time_tkn) %>%
+  data.frame(tot_counts = .) %>%
+  tibble::rownames_to_column("doc_id") %>%
+  dplyr::as_tibble()
+
+ds_counts <- dplyr::full_join(ds_counts, tot_counts, by = "doc_id")
+
+ds_counts <- ds_counts %>%
+  dplyr::mutate_if(is.numeric, list(~./tot_counts), na.rm = TRUE) %>%
+  dplyr::mutate_if(is.numeric, list(~.*100), na.rm = TRUE)
+
+ds_counts$tot_counts <- NULL
+
+```
+\
+
+```{r}
+# Simplify table to ticker_symbol, date and sentiment_score
+twt_sentiment <- ds_counts %>%
+  mutate(
+    ticker_symbol = str_extract(doc_id, "^[A-Z]+"),
+    date = as.Date(paste0(word(doc_id, 2, sep = "_"), '-01'), format='%Y-%m-%d')
+    ) %>%
+  dplyr::select(ticker_symbol, date, sentiment_score) %>%
+  filter(date >= "2015-01-01")
+
+```
+\
+
+## Graphing time series plot
+```{r sentiment_score, fig.height=4, fig.width=7, fig.cap="Sentiment scores of for 5 Tech company tickers from 2015 ~ 2019"}
+# Graphing the time series plot
+ggplot(twt_sentiment, aes(x=date, y=sentiment_score, color=ticker_symbol)) +
+    geom_point(size = .5) +
+    geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), size=1, 
+                level=0.95, se=T) +
+    labs(x="Date", y = "Sentiment Score", title="Sentiment scores for 5 
+         tech companies over time (2015~2020)")+ 
+    theme(panel.grid.minor.x=element_blank(),
+          panel.grid.major.x=element_blank()) +
+    theme(panel.grid.minor.y =   element_blank(),
+          panel.grid.major.y =   element_line(colour = "gray",size=0.25)) +
+    theme(rect = element_blank()) +
+    theme(legend.title=element_blank()) +
+    scale_color_manual(values = c("black",
+                                  "orange",
+                                  "blue",
+                                  "red",
+                                  "darkgreen"))
+
+```
+\
+
+```{r sentiment_score2, fig.height=4, fig.width=7, fig.cap="Sentiment scores of for 5 Tech company tickers from 2015 ~ 2019"}
+# Graphing the time series plot with confidence intervals
+ggplot(twt_sentiment, aes(x=date, y=sentiment_score, color=ticker_symbol)) +
+    geom_point(size = .5) +
+    geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), size=1, 
+                level=0.95, se=F) +
+    labs(x="Date", y = "Sentiment Score", title="Sentiment scores for 5 
+         tech companies over time (2015~2020)")+ 
+    theme(panel.grid.minor.x=element_blank(),
+          panel.grid.major.x=element_blank()) +
+    theme(panel.grid.minor.y =   element_blank(),
+          panel.grid.major.y =   element_line(colour = "gray",size=0.25)) +
+    theme(rect = element_blank()) +
+    theme(legend.title=element_blank()) +
+    scale_color_manual(values = c("black",
+                                  "orange",
+                                  "blue",
+                                  "red",
+                                  "darkgreen"))
+
+```
+\
+
+\pagebreak
+
+# Code Appendix (part 1) - Corpus Composition, Keyness Analysis, Time-series Plot
+
+```{r ref.label=knitr::all_labels(), echo = T, eval = F}
+```
