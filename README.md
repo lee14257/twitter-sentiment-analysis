@@ -5,6 +5,6 @@ In this paper we address questions related to sentimental and topical trends, as
 
 ## Code
 This repository contains the code components used to conduct analysis and produce the research report. 
-- Time_series.Rmd: Demonstrates the sentimental time-series plot for the 5 Big-Tech companies over time (2014 December ~ 2019 December)
-- MDA_Topic_modeling.Rmd: Displays the Latent Dirichlet Allocation (LDA) topic model used for analyzing topical tendencies of the tweets. Also shows how Multidimensional Analysis (MDA) is used to investigate linguistic characteristics of tweets differing in sentimental polarity.
-- ds_dict.yml: Docuscope dictionary used for part-of-speech (POS) tagging of linguistic features.
+- **Time_series.Rmd:** Demonstrates sentimental time-series plots for the 5 Big-Tech companies over time (2014 December ~ 2019 December)
+- **MDA_Topic_modeling.Rmd:** Displays the Latent Dirichlet Allocation (LDA) topic model used for analyzing topical tendencies of the tweets. Also shows how Multidimensional Analysis (MDA) is used to investigate linguistic characteristics of tweets differing in sentimental polarity.
+- **ds_dict.yml:** Docuscope dictionary used for part-of-speech (POS) tagging and calculation of sentiment scores.
