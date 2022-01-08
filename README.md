@@ -7,7 +7,6 @@ Short excerpt from the paper is provided below:
 
 ## Data
 The dataset was part of a paper published in the 2020 IEEE International Conference under the Intelligent Data Mining track (Mustafa Do ̆gan, Et al. 2020), primarily to determine possible speculators and influencers in the stock market. The dataset contains over 3 million unique tweets with features such as tweet id, post date, text body, and the number of comments and likes matched with the related company ticker.
-https://www.kaggle.com/omermetinn/tweets-about-the-top-companies-from-2015-to-2020
 
 ## Code
 This repository contains the code components used to conduct analysis and produce the research report. 
