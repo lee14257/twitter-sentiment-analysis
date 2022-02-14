@@ -1,4 +1,4 @@
-# Sentimental and Topical Trend Analysis of Big-Tech Tweets
+# Sentimental Analysis and Topical Modeling of Big-Tech Tweets
 
 Short excerpt from the paper is provided below:
 
