@@ -23,7 +23,7 @@ Part-of-speech tagging was done using the [Docuscope](https://github.com/docusco
 
 ## 3. Keyness Tables (Log-likelihood)
 
-<img src="/doc/pic/keyness-table.png" width="650" height="500">
+<img src="/doc/pic/keyness-table.png" width="670" height="450">
 
 
 ## 4. Sentimental Time Series Graph
