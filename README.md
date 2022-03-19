@@ -35,13 +35,15 @@ Below are the sentiment scores of tweets over time with 95% Confidence Intervals
 <img src="/doc/pic/sentiment-graph.png" width="750" height="450">
 
 ## 5. Topic Modeling (LDA)
+Latent Dirichlet Allocation (LDA) topic model was used to classify clusters of text to a prevalent topic during a time window.
+
 #### Topic Model for Tesla
 <img src="doc/pic/tsla_topic.png" width="700" height="350">
-<img src="doc/pic/tsla_topic_tkn.png" width="450" height="150">
+<img src="doc/pic/tsla_topic_tkn.png" width="450" height="130">
 
 #### Topic Model for Microsoft
 <img src="doc/pic/msft_topic.png" width="700" height="350">
-<img src="doc/pic/msft_topic_tkn.png" width="450" height="150">
+<img src="doc/pic/msft_topic_tkn.png" width="470" height="180">
 
 
 ## 6. Multi-dimensional Analysis (MDA)
