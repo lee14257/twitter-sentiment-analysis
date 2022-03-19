@@ -32,10 +32,19 @@ After using [Docuscope](https://github.com/docuscope/DocuScope-Dictionary-June-2
 
 Below are the sentiment scores of tweets over time with 95% Confidence Intervals (CI). 
 
-<img src="/doc/pic/sentiment-graph.png" width="800" height="500">
+<img src="/doc/pic/sentiment-graph.png" width="750" height="450">
+
+## 5. Topic Modeling (LDA)
+### Topic Modeling for TSLA
+<img src="doc/pic/tsla_topic.png" width="700" height="350">
+<img src="doc/pic/tsla_topic_tkn.png" width="450" height="150">
+
+### Topic Modeling for MSFT
+<img src="doc/pic/msft_topic.png" width="700" height="350">
+<img src="doc/pic/msft_topic_tkn.png" width="450" height="150">
 
 
-## 5. Multi-dimensional Analysis (MDA)
+## 6. Multi-dimensional Analysis (MDA)
 
 MDA was used to analyze linguistic characteristics between two corpora with differing sentimental polarity (TSLA vs MSFT).
 
